@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ImageResizer
 {
@@ -56,6 +57,40 @@ namespace ImageResizer
                 string destFile = Path.Combine(destPath, imgName + ".jpg");
                 processedImage.Save(destFile, ImageFormat.Jpeg);
             }
+        }
+
+        public async Task ResizeImagesAsync(string sourcePath, string destPath, double scale)
+        {
+            var allFiles = FindImages(sourcePath);
+            List<Task> tasks = new List<Task>();
+            foreach (var filePath in allFiles)
+            {
+                tasks.Add(Task.Run(() =>
+                {
+                    Resize(destPath, scale, filePath);
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+        }
+
+        private void Resize(string destPath, double scale, string filePath)
+        {
+            Image imgPhoto = Image.FromFile(filePath);
+            string imgName = Path.GetFileNameWithoutExtension(filePath);
+
+            int sourceWidth = imgPhoto.Width;
+            int sourceHeight = imgPhoto.Height;
+
+            int destionatonWidth = (int)(sourceWidth * scale);
+            int destionatonHeight = (int)(sourceHeight * scale);
+
+            Bitmap processedImage = processBitmap((Bitmap)imgPhoto,
+                sourceWidth, sourceHeight,
+                destionatonWidth, destionatonHeight);
+
+            string destFile = Path.Combine(destPath, imgName + ".jpg");
+            processedImage.Save(destFile, ImageFormat.Jpeg);
         }
 
         /// <summary>
