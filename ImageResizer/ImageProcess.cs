@@ -59,7 +59,7 @@ namespace ImageResizer
             }
         }
 
-        public async Task ResizeImagesAsync(string sourcePath, string destPath, double scale)
+        public Task ResizeImagesAsync(string sourcePath, string destPath, double scale)
         {
             var allFiles = FindImages(sourcePath);
             List<Task> tasks = new List<Task>();
@@ -71,7 +71,7 @@ namespace ImageResizer
                 }));
             }
 
-            await Task.WhenAll(tasks);
+            return Task.WhenAll(tasks);
         }
 
         private void Resize(string destPath, double scale, string filePath)
